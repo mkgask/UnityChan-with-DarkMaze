@@ -1,0 +1,51 @@
+@startuml
+
+namespace GameStageRank {
+    class Service {
+        -IGameStage room_status
+        -IPlayerStatus player_status
+        -IEnemyStatus enemy_status
+        -Entity entity
+        -float item_rank_scale
+        -float enemy_rank_scale
+        -float props_rank_scale
+        -int rank_min
+        -int rank_max
+
+        +init(IGameStage room_status, IPlayerStatus player_status, IEnemyStatus enemy_status)
+        +item()
+        +enemy()
+        +props()
+    }
+
+    class Entity {
+        -const int rank_list_length = 10
+        -List<List<Rank>> rank_list
+        
+        +this[int]()
+        +rand(int rank)
+    }
+
+    enum Rank {
+        None
+        D
+        C
+        B
+        A
+        S
+    }
+
+    interface IGameStageRank {
+        +init()
+        +item()
+        +enemy()
+        +props()
+    }
+}
+
+GameStageRank.Service --|> GameStageRank.IGameStageRank
+GameStageRank.Service -up-> Character.Player.IPlayerStatus
+GameStageRank.Service -> GameStageRank.Entity
+GameStageRank.Entity -> GameStageRank.Rank
+
+@enduml

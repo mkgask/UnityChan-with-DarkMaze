@@ -1,0 +1,29 @@
+@startuml
+
+namespace Storage {
+    class Entity {
+        ファイル一個分を管理
+        -string path
+        +reset(string path)
+        +bool save<T>(string path, T obj)
+        +T load<T>(string path)
+    }
+
+    +class Service {
+        機能の窓口
+        -Dictionary<string, Entity> entities
+
+        +bool save<T>(string key, Object obj)
+        +T load<T>(string key)
+    }
+
+    +class Keys {
+        保存可能なデータのキー一覧
+        +const string a = 'a'
+    }
+}
+
+Storage.Service -> Storage.Entity
+Storage.Service -down-> Storage.Keys
+
+@enduml

@@ -1,0 +1,85 @@
+@startuml
+
+namespace Character {
+    class Entity {
+        +ICharacterStatus status
+        +ICharacterEquip equip
+        +ICharacterLvUpTable lv_exp_table
+        +GameObject obj
+        +Vector3 equip_base_position
+        +Entity()
+        +expAdd(int add_exp)
+        +lv()
+        +hp()
+        +hp_max()
+        +atk()
+        +def()
+        +spd()
+        +exp()
+        +nextExp()
+        +damage(int damage)
+        +equipChange(EquipEntity equip)
+    }
+}
+
+namespace Character.Player {
+    class Controller {
+        -Service service
+        +OnTriggerEnter()
+        +OnAttack()
+        +OnDamage()
+        +OnVictory()
+        +OnDie()
+        +OnLvUp()
+        +OnPickUp()
+        +OnMove()
+        +OnMoveEnable()
+        +OnMoveDisable()
+    }
+
+    class Service {
+        -Entity entity
+        +lv()
+        +damage(int damage)
+        +victory(int exp)
+        +die()
+        +equipChange(EquipEntity equip)
+    }
+
+    class Entity {
+    }
+}
+
+Character.Player.Controller -> Character.Player.Service
+Character.Player.Service -> Character.Player.Entity
+
+namespace Character.Monster {
+    class Controller {
+        -Service service
+        -int id
+        +OnTriggerEnter()
+        +OnAttack()
+        +OnDamage()
+        +OnVictory()
+        +OnDie()
+    }
+
+    class Service {
+        -IMonsterSpawner spawner
+        -List<Entity> entities
+        +damage(int damage)
+        +die()
+        +spawn
+    }
+
+    class Entity {
+    }
+}
+
+Character.Player.Controller..Character.Monster.Controller
+
+Character.Monster.Controller -> Character.Monster.Service
+Character.Monster.Service -> Character.Monster.Entity
+
+
+@enduml

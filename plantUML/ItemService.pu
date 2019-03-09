@@ -1,0 +1,45 @@
+@startuml
+
+namespace Item {
+
+    interface IItem {
+    }
+
+    class ItemService {
+        -GameStageRankService rank_service
+        -Rank rank
+        -Dictionary<Rank, List<ItemEntity>> collection_list
+
+        +rand()
+            rank = rank_service.item()
+            length = collection_list[rank].Count
+            return collection_list[rank][(new Random.Next(length))]
+    }
+
+    class ItemWeapon {
+        int atk
+        int def
+        int spd
+        int sp_atk
+        int sp_def
+        int sp_spd
+    }
+
+    class ItemEntity {
+        string name
+        ItemType type
+        string prefab_path
+        GameObject obj
+
+        +show(出現位置をVector3で受け取る)
+            if (obj == null) obj = ObjectPool.takeOut(prefab_path)
+        +hidden()
+    }
+
+    ItemService -> IItem
+    ItemWeapon -up-> IItem
+    ItemWeapon -up-> ItemEntity
+
+}
+
+@enduml

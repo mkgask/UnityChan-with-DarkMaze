@@ -1,0 +1,29 @@
+@startuml
+
+namespace Character.Monster.Spawn {
+    class MonsterSpawnManager {
+        Start()
+    }
+
+    interface IMonsterSpawner {
+        +spawn()
+    }
+}
+
+namespace Character.Monster {
+    class Service {
+        +List<Entity> entities
+        +damage(int damage)
+        +die()
+        +spawn()
+    }
+}
+
+Character.Monster.Spawn.MonsterSpawnManager -> Character.Monster.Spawn.IMonsterSpawner
+Character.Monster.Service -up-> Character.Monster.Spawn.IMonsterSpawner
+Character.Monster.Service -> Character.Monster.Entity
+Character.Monster.Entity -up-|> Character.Entity
+
+
+
+@enduml

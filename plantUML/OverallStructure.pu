@@ -1,0 +1,57 @@
+@startuml
+
+class SceneService {
+
+}
+
+class InputService {
+
+}
+
+class PlayerService {
+
+}
+
+class EnemyService {
+
+}
+
+class EffectiveFloorService {
+
+}
+
+class FieldObjectService {
+
+}
+
+class ObjectPoolService {
+
+}
+
+class ItemService {
+
+}
+
+class GameStageService {
+
+}
+
+class GameStageRankService {
+
+}
+
+
+PlayerService -up-> InputService
+
+FieldObjectService -up-> EffectiveFloorService
+
+ItemService -up-> ObjectPoolService
+EnemyService -up-> ObjectPoolService
+FieldObjectService -up-> ObjectPoolService
+
+ItemService -up-> GameStageRankService
+EnemyService -up-> GameStageRankService
+FieldObjectService -up-> GameStageRankService
+
+
+@enduml

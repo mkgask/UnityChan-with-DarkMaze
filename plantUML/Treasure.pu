@@ -1,0 +1,197 @@
+@startuml
+
+namespace Character.Player {
+    class Controller {
+        -Service service
+        +OnTriggerEnter()
+        +OnAttack()
+        +OnDamage()
+        +OnVictory()
+        +OnDie()
+        +OnLvUp()
+        +OnPickUp()
+        +OnMove()
+        +OnMoveEnable()
+        +OnMoveDisable()
+    }
+
+    class Service {
+        -Entity entity
+        +lv()
+        +damage(int damage)
+        +victory(int exp)
+        +die()
+        +equipChange(EquipEntity equip)
+    }
+}
+
+Character.Player.Controller -> Character.Player.Service
+
+namespace FieldObject {
+    class Controller {
+        -Service service
+        -int id
+        -bool target_enable
+        +OnTarget
+        +OnTriggerEnter
+    }
+
+    class Manager {
+        +Start()
+    }
+
+    class Service {
+        List<Entity> entities
+        +reset()
+        +touch(int id)
+    }
+
+    class Entity {
+        -int id
+        -bool trigger_enable
+        -Item.Inventory.Entity inventory
+        +touch()
+    }
+
+    class Factory {
+        -IEffectiveFloor effective_floor
+        -IGameStageRank game_stage_rank
+        -Dictionary<GameStageRank.Rank, List<Entity>> base_resources
+        +rand()
+    }
+
+    interface IFactory {
+        +rand()
+    }
+}
+
+FieldObject.Controller..Character.Player.Controller
+FieldObject.Controller -> FieldObject.Service
+FieldObject.Controller -> FieldObject.Entity
+
+FieldObject.Manager -left-> FieldObject.Service
+
+FieldObject.Service -down-> FieldObject.Factory
+FieldObject.Service -down-> FieldObject.Entity
+
+FieldObject.Entity -down-> Item.Inventory.IInventory
+
+FieldObject.Factory -down-> GameStageRank.IGameStageRank
+FieldObject.Factory -right-> GameStageRank.Rank
+FieldObject.Factory -down-> EffectiveFloor.IEffectiveFloor
+FieldObject.Factory -> FieldObject.Entity
+
+FieldObject.Factory --|> FieldObject.IFactory
+
+namespace Item {
+    class Entity {
+        GameObject obj
+    }
+}
+
+namespace Item.Equip {
+    class Entity {
+        +Vector3 position_offset
+        +int atk
+        +int def
+        +int spd
+        +int atk_sp
+        +int def_sp
+        +int spd_sp
+        +atk()
+        +def()
+        +spd()
+    }
+
+    class Controller {
+        -int id
+        -Item.Entity entity
+        -bool target_enable
+        +OnTarget
+        +OnTriggerEnter
+    }
+}
+
+Item.Equip.EquipEntity --|> Item.Entity
+Item.Equip.Controller..Character.Player.Controller
+Item.Equip.Controller -down-> Item.Entity
+
+namespace Item.Inventory {
+    class Entity {
+        -List<Entity> entities
+        -int max
+        +takeOut()
+        +putIn()
+    }
+
+    interface IInventory {
+        +takeOut()
+        +putIn()
+    }
+}
+
+Item.Inventory.Entity --|> Item.Inventory.IInventory
+Item.Inventory.Entity -down-> Item.Entity
+
+namespace GameStageRank {
+    enum Rank {
+        None
+        D
+        C
+        B
+        A
+        S
+    }
+
+    interface IGameStageRank {
+        +init()
+        +item()
+        +enemy()
+        +props()
+    }
+}
+
+namespace EffectiveFloor {
+    class Manager {
+        +Start()
+    }
+
+    class Service {
+        -List<Entity> entities
+        +reset()
+        +takeOut()
+        +putIn()
+    }
+
+    class Factory {
+        +rand()
+    }
+
+    class Entity {
+        +Vector3 position
+        +Vector3 rotation
+    }
+
+    interface IEffectiveFloor {
+        +takeOut()
+        +putIn()
+    }
+}
+
+EffectiveFloor.Manager -right-> EffectiveFloor.Service
+
+EffectiveFloor.Factory -right-> EffectiveFloor.Entity
+
+EffectiveFloor.Service -down-> EffectiveFloor.Factory
+EffectiveFloor.Service -down-> EffectiveFloor.Entity
+EffectiveFloor.Service -> EffectiveFloor.IEffectiveFloor
+
+namespace Character.Monster.Spawn {
+    class Manager {
+        +spawn()
+    }
+}
+
+Character.Monster.Spawn.Manager -up-> FieldObject.IFactory
+
+@enduml

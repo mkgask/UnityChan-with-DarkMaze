@@ -1,0 +1,15 @@
+@startuml
+
+namespace Item.Chest {
+
+    class ChestController {
+        -ItemEntity item
+        +Start()
+            item = ItemService.rand()
+        +OnTriggerEnter()
+            item.show(Chest位置をVector3で渡す)
+    }
+
+}
+
+@enduml

@@ -1,0 +1,39 @@
+@startuml
+
+namespace Character {
+    class Entity {
+        +StatusEntity status
+        +EquipEntity equip
+        +LvUpTable lv_exp_table
+        +Entity()
+        +expAdd(int add_exp)
+        +lv()
+        +hp()
+        +hp_max()
+        +atk()
+        +def()
+        +spd()
+        +exp()
+        +nextExp()
+        +damage(int damage)
+        +equipChange(EquipEntity equip)
+    }
+
+}
+
+namespace Character.Player {
+    class Entity {
+
+    }
+}
+
+namespace Character.Monster {
+    class Entity {
+
+    }
+}
+
+Character.Player.Entity -up-|> Character.Entity
+Character.Monster.Entity -up-|> Character.Entity
+
+@enduml

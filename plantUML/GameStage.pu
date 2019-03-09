@@ -1,0 +1,68 @@
+@startuml
+
+namespace GameStage {
+    class GameStageManager {
+        +Start()
+    }
+
+    class nextStageController {
+        -Direction direction
+        +OnTriggerEnter
+    }
+
+    class Service {
+        -Dictionary<Direction, Vector3> src_position
+        -Dictionary<Direction, Vector3> src_rotation
+        -int clear_room_num
+        +reset(int MonsterStrengthAdd, int MonsterNumAdd)
+    }
+
+    enum Direction {
+        left
+        front
+    }
+}
+
+GameStage.GameStageManager -down-> GameStage.Service
+GameStage.nextStageController -down-> GameStage.Service
+GameStage.nextStageController -down-> GameStage.Direction
+
+GameStage.Service -left-> GameStage.Direction
+
+GameStage.Service -right-> Character.Player.Service
+GameStage.Service -down-> Character.Monster.Service
+GameStage.Service -down-> Character.Monster.Spawn.Manager
+GameStage.Service -down-> EffectiveFloor.Service
+GameStage.Service -down-> FieldObject.Service
+
+namespace Character.Player {
+    class Service {
+        +reset(Vector3 position, Vector3 rotation)
+    }
+}
+
+namespace Character.Monster {
+    class Service {
+        +reset(int monster_strength_add, int monster_num_add)
+    }
+}
+
+namespace Character.Monster.Spawn {
+    class Manager {
+        +Start()
+    }
+}
+
+namespace EffectiveFloor {
+    class Service {
+        +reset()
+    }
+}
+
+namespace FieldObject {
+    class Service {
+        +reset()
+    }
+}
+
+@enduml

@@ -1,0 +1,227 @@
+@startuml
+
+namespace Character {
+    class Entity {
+        +ICharacterStatus status
+        +ICharacterEquip equip
+        +ICharacterLvUpTable lv_exp_table
+        +GameObject obj
+        +Vector3 equip_base_position
+        +Entity()
+        +expAdd(int add_exp)
+        +lv()
+        +hp()
+        +hp_max()
+        +atk()
+        +def()
+        +spd()
+        +exp()
+        +nextExp()
+        +damage(int damage)
+        +equipChange(EquipEntity equip)
+    }
+
+    interface ICharacterStatus {
+    }
+
+    interface ICharacterLvUpTable {
+        +lvUpCheck(int now_exp, int next_lv)
+        +nextExp(int next_lv)
+    }
+
+    interface ICharacterEquip {
+        +atk()
+        +def()
+        +spd()
+    }
+
+}
+
+Character.Entity -> Character.ICharacterStatus
+Character.Entity -> Character.ICharacterLvUpTable
+Character.Entity -> Character.ICharacterEquip
+
+namespace Character.Status {
+    class LvUpTable {
+        -Dictionary<int, int> table
+        +lvUpCheck(int now_exp, int next_lv)
+        +nextExp(int next_lv)
+    }
+
+    class Entity {
+        +int lv
+        +int hp
+        +int hp_max
+        +int atk
+        +int def
+        +int spd
+        +int exp
+    }
+}
+
+Character.Status.Entity -up-|> Character.ICharacterStatus
+Character.Status.LvUpTable -up-|> Character.ICharacterLvUpTable
+
+namespace Item.Equip {
+    class Entity {
+        +GameObject obj
+        +Vector3 position_offset
+        +int atk
+        +int def
+        +int spd
+        +int atk_sp
+        +int def_sp
+        +int spd_sp
+        +atk()
+        +def()
+        +spd()
+    }
+}
+
+Item.Equip.EquipEntity -up-|> Character.ICharacterEquip
+
+namespace Character.Player {
+    class Entity {
+    }
+
+    class Controller {
+        -Service service
+        +OnTriggerEnter()
+        +OnAttack()
+        +OnDamage()
+        +OnVictory()
+        +OnDie()
+        +OnLvUp()
+        +OnPickUp()
+        +OnMove()
+        +OnMoveEnable()
+        +OnMoveDisable()
+    }
+
+    class Service {
+        -Entity entity
+        +lv()
+        +damage(int damage)
+        +victory(int exp)
+        +die()
+        +equipChange(EquipEntity equip)
+    }
+
+    interface IPlayerStatus {
+        +lv()
+    }
+}
+
+Character.Player.Entity --|> Character.Entity
+Character.Player.Controller -> Character.Player.Service
+
+Character.Player.Service -> Character.Player.Entity
+Character.Player.Service --|> Character.Player.IPlayerStatus
+
+namespace Character.Monster {
+    class Entity {
+        +int id
+    }
+
+    class Controller {
+        -Service service
+        -int id
+        +OnTriggerEnter()
+        +OnAttack()
+        +OnDamage()
+        +OnVictory()
+        +OnDie()
+    }
+
+    class Service {
+        -IMonsterSpawner spawner
+        -List<Entity> entities
+        -int monster_strength
+        -int monster_num
+        +damage(int damage)
+        +die()
+        +spawn()
+        +reset(int monster_strength_add, int monster_num_add)
+    }
+
+    interface IMonsterStatus {
+    }
+}
+
+namespace Character.Monster.Spawn {
+    class Manager {
+        -IGameStageRank game_stage_rank
+        +Dictionary<GameStageRank.Rank, List<Character.Monster.Entity>> spawn_table
+        +Start()
+        +spawn()
+    }
+
+    interface IMonsterSpawner {
+        +spawn()
+    }
+
+}
+
+Character.Monster.Entity -up-|> Character.Entity
+
+Character.Monster.Controller -> Character.Monster.Service
+
+Character.Monster.Service -> Character.Monster.Entity
+Character.Monster.Service -up-> Character.Monster.Spawn.IMonsterSpawner
+
+Character.Monster.Spawn.Manager --|> Character.Monster.Spawn.IMonsterSpawner
+Character.Monster.Spawn.Manager -up-> GameStageRank.IGameStageRank
+Character.Monster.Spawn.Manager -up-> GameStageRank.Rank
+Character.Monster.Spawn.Manager -> Character.Monster.Entity
+
+Character.Monster.Service -right-|> Character.Monster.IMonsterStatus
+
+namespace GameStageRank {
+    class Service {
+        -IRoomStatus room_status
+        -IPlayerStatus player_status
+        -IMonsterStatus enemy_status
+        -Entity entity
+        -float item_rank_scale
+        -float enemy_rank_scale
+        -float props_rank_scale
+        -int rank_min
+        -int rank_max
+
+        +init()
+        +item()
+        +enemy()
+        +props()
+    }
+
+    class Entity {
+        -const int rank_list_length = 10
+        -List<List<Rank>> rank_list
+        +this[int]()
+        +rand(int rank)
+    }
+
+    enum Rank {
+        None
+        D
+        C
+        B
+        A
+        S
+    }
+
+    interface IGameStageRank {
+        +init()
+        +item()
+        +enemy()
+        +props()
+    }
+}
+
+GameStageRank.Service --|> GameStageRank.IGameStageRank
+GameStageRank.Service -up-> Character.Player.IPlayerStatus
+GameStageRank.Service -> Character.Monster.IMonsterStatus
+GameStageRank.Service -> GameStageRank.Entity
+GameStageRank.Entity -down-> GameStageRank.Rank
+
+@enduml

@@ -1,0 +1,48 @@
+@startuml
+
+namespace ObjectPool {
+
+    enum Type {
+        None
+        Item
+        Monster
+        Props
+    }
+
+    interface IPoolObject{
+    }
+
+    class ObjectPoolService {
+        -Dictionary<Type, Dictionary<string, Queue<IPoolObject>>> pool
+        -Dictionary<Type, int> pool_keep
+        -int pool_gc_interval = 100
+        -int pool_gc_count = 0
+        -bool gc_activating = false
+
+        -gc()
+            pool_gc_count += 1
+            if (pool_gc_interval < pool_gc_count) { return }
+            pool_gc_count = 0
+            gc_activating = true
+            MainThreadDispatcher.SendStartCoroutine(() => {
+                Type.forEach((type)=> {
+                    pool[type].forEach((pool_list) => {
+                        while (pool_list.Count < pool_keep[type]) {
+                            pool_list.Dequeue()
+                        }
+                    })
+                })
+            })
+            gc_activating = false
+        +takeOut(Type type)
+            if (!pool.ContainsKey(type)) { pool.Add(type, new Queue<IPoolObject>) }
+            if (gc_activating || pool[type].Count < 1) { return new Type; }
+            return pool[type].Dequeue()
+        +return(Type, IPoolObject)
+            pool.Add(IPoolObject)
+            gc()
+    }
+
+}
+
+@enduml

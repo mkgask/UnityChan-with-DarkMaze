@@ -1,0 +1,662 @@
+
+
+
+画面
+
+    左上
+        プレイヤー顔
+        レベル
+        現HP/MAXHP・HPバー
+        経験値割合・経験値バー
+    右上
+        現在の部屋数
+        モンスター撃破数
+    左下
+        装備している武器の名前
+        装備後のステータス　攻撃・防御・速さ
+    右下
+        メニューボタン（押したら一時停止）
+            ゲーム終了
+
+
+
+BGMどうすんのさ・・・
+
+
+
+幕間処理
+
+    画面アウト
+        ウェーブ処理数がゼロなら
+            ゲームスタート表示
+        1以上なら
+            ウェーブクリア
+            次の部屋を用意しています
+
+    部屋の後片付け
+        モンスターの死体除去
+        宝箱除去
+        家具除去
+        左ドアorブロック除去
+        前ドアorブロック除去
+
+    部屋再生成
+        宝箱中身生成
+        宝箱設置
+        家具配置生成
+        家具設置
+        左ドアorブロック設置
+        前ドアorブロック設置
+        部屋数を+1
+    
+    ウェーブ生成
+        モンスター出現数生成
+        モンスター強さ生成
+        モンスターリスト生成
+            モンスター生成ループ
+                強さ、種族設定
+            出現数と強さから宝箱の数生成
+            モンスターに宝箱付与
+    
+    プレイヤー位置移動
+        プレイヤー移動
+            前の部屋で入ったのが左ドアだったら右位置
+            前ドアだったら後ろ位置
+
+    画面イン
+
+ウェーブ処理
+
+    部屋数を画面中央に表示し、フェードアウト
+    プレイヤー移動可能
+
+    モンスター待機リストをループ
+        モンスター出現間隔の時間待機
+        モンスター出現
+            ドア前まで歩く
+            モンスターAI始動
+        出現したモンスターは待機リストから除去
+
+    モンスター残り数を常時チェック
+        待機リストが空かつ全モンスターが倒されたら
+            ウェーブクリアエフェクト
+            プレイヤーHP回復（＋エフェクト）
+
+ドア処理
+
+    プレイヤーがドア位置に立ったら
+        ウェーブクリアしていれば
+            次の部屋へ向かいますか？確認OKなら
+                左のドアなら敵強さ+1
+                前のドアなら敵出現数+(部屋数/10)
+                幕間処理開始
+        クリア前は処理しない
+
+モンスター処理
+
+    プレイヤー位置探索
+        プレイヤー位置取得
+            そっちに向かって歩く
+
+    タップされたら名前出すくらいはしてもいいかも
+
+    死んだら
+        モンスター撃破数+1
+        経験値を倒した相手に送信
+        宝箱を持っていたら出現させる
+
+    生成
+        モンスター強さから出現するモンスターのリストを生成
+            これで20ランクになるので、強さ5ごとに1ランクあがる感じで
+        モンスター種類ランダム決定
+        モンスター強さ＋ランクごとのランダム数値で強さ生成
+
+ゲームステージ
+    1  DDDDDDDDDD D10
+    2  DDDDDDDDDC D9 C1
+    3  DDDDDDDDCC D8 C2
+    4  DDDDDDDCCC D7 C3
+    5  DDDDDDCCCC D6 C4
+    6  DDDDDCCCCC D5 C5
+    7  DDDDCCCCCB D4 C5 B1
+    8  DDDCCCCCBB D3 C5 B2
+    9  DDCCCCCBBB D2 C5 B3
+    10 DCCCCCBBBB D1 C5 B4
+    11 CCCCBBBBBA    C4 B5 A1
+    12 CCCBBBBBAA    C3 B5 A2
+    13 CCBBBBBAAA    C2 B5 A3
+    14 CBBBBBAAAA    C1 B5 A4
+    15 BBBBAAAAAS       B4 A5 S1
+    16 BBBAAAAASS       B3 A5 S2
+    17 BBAAAAASSS       B2 A5 S3
+    18 BAAAAASSSS       B1 A5 S4
+    19 BAAAASSSSS       B1 A4 S5
+    20 BAAASSSSSS       B1 A3 S6
+
+    武器の出現率、モンスターの出現率、家具の出現率に影響
+
+    武器の出現率は部屋のクリア数/5
+    モンスターの出現率はモンスター強さ/5
+    家具の出現率はプレイヤーレベル/5
+    くらいにしとけばええんちゃう？
+
+プレイヤー処理
+
+    有効位置のタップがあったら
+        その位置に向かって歩く
+            到着後、タップ先が武器だったら、武器を入れ替え
+
+    一定範囲内をチェック
+        キャラクター処理の範囲チェックを実行
+        戦闘中でなく宝箱があったら
+            宝箱を開封
+
+    武器を入れ替え
+        装備中の武器を地面に投げる
+        地面の武器を装備
+        画面表記の切り替え
+            古い数値より上がったら上向きの赤い矢印
+            下がったら下向きの青い矢印
+
+    経験値が送られてきたら
+        保持経験値に加算
+        レベルアップテーブルを越えたらレベルアップ
+            全ステ+1（HPは+10）
+            HP全回復
+
+キャラクター処理
+
+    一定範囲内をチェック
+        敵が居たら
+            足を止めてそっちを向く
+                一定時間ごとに攻撃モーション
+                    モーション中の適したタイミングで敵にダメージ送信
+
+    ダメージが送られてきたら
+        防御力で相殺してダメージを算出、ゼロなら1にする
+        ダメージエフェクト
+        残りHPからダメージを引く
+        HPゼロになったら死亡モーション
+        死んでなければダメージモーション
+
+宝箱処理
+
+    開封
+        開封モーション
+        武器が地面に落ちる
+
+    生成
+        プレイヤーレベル、部屋数、敵強さ、敵出現数から武器ランクを計算
+        （全部足して100で割るくらい？・・・だと一部屋3ずつしか数値が伸びないので30部屋で1ランク上がるくらい）
+        （部屋数/10くらいにしておいたほうが最初は無難か、10,30,60,100,150とかの固定値でランクA武器出現！とかのエフェクト入れるといいかも）
+            武器出現ランクD　基本装備しか出ない（FreeWeapons）
+            武器出現ランクC　鋼シリーズ追加（Medieval Sword Pack）
+            武器出現ランクB　ヘビーシリーズ追加（FantasyHeavyWeaponPack）
+            武器出現ランクA　エルヴンシリーズ追加（Elven Weapons）
+            武器出現ランクS　伝説装備追加（GreatswordofFrozenNight、Dragonblade、Rune Sword、King Axe）
+        武器種類をランダム決定
+        武器基本強さを武器テーブルから取得
+        ランダムで追加強さ付与
+
+
+アイテム処理
+
+    アイテムのリストを生成
+        Dictionary<string id, ItemEntity> list
+    アイテムテーブル生成（アイテムのIDだけ持ってればいい）
+        Dictionary<ItemType, Dictionary<ItemRank, アイテムID>> table
+            武器
+                D D1, D2, D3, D4
+                C C1, C2, C3, C4
+                B B1, B2, B3, B4
+                A A1, A2, A3, A4
+                S S1, S2, S3, S4
+    アイテムテーブルからアイテム抽出
+        T random<T>(ItemType type, ItemRank rank)
+            table.ConstainsKey(type)
+                table[type].ConstainsKey(rank)
+                    return (T)list[table[type][rank]]
+
+
+
+
+モンスター種類
+
+    ランクD
+        バット
+          ヤドカリ
+        ラビット
+          クモ
+    ランクC
+        ゴースト
+          スライム
+          マッシュルーム
+          スケルトン
+        ウルフ
+        ゴブリン
+    ランクB
+        ホブゴブリン
+        トロール
+    ランクA
+        リプタイル
+        リノ
+    ランクS
+        レッドドラゴン
+        テラードラゴン
+        ヘビードラゴン
+        エビルドラゴン
+
+
+
+武器種類
+
+    Dランク（基本3～9、追加0～5、幅3～14（9））
+        アイアンナイフ          1, 0, 3
+        アイアンソード          3, 1, 1
+        アイアンアクス          5, 1, 0
+        アイアンメイス          4, 2, 0
+        アイアンスタッフ        2, 3, 1
+    Cランク（基本13～19、追加6～15、幅19～34（15））
+        スチールダガー          10, 3, 6
+        スチールソード          15, 5, 0
+        スチールアクス          16, 4, 0
+        スチールメイス          16, 2, 2
+        ライトスタッフ          2, 3, 1
+    Bランク（基本33～39、追加16～25、幅49～64（15））
+        ククリナイフ            21, 1, 7
+        ヘビーソード            23, 5, 2
+        ヘビーアクス            27, 2, 0
+        ヘビーメイス            25, 3, 1
+        ヘビーハンマー          29, 0, 0
+        スタッフオブペイン        29, 0, 0
+    Aランク（基本63～69、追加26～45、幅89～114（25））
+        デーモンダガー          31, 3, 8
+        エルヴンソード          35, 3, 5
+        エルブンアクス          38, 2, 0
+        エルブンハンマー        38, 2, 0
+        エルヴンスタッフ          34, 5, 5
+    Sランク（基本103～109、追加46～75、幅149～184（35））
+        ドラゴンナイフ          50, 5, 15
+        フローズンナイトソード   55, 10, 10
+        ドラゴンブレード        60, 5, 5
+        ルーンソード            57, 10, 5
+        ルーニックアクス        65, 15, 0
+        ソルハンマー            36, 2, 2
+        ミスティックハンマー    60, 20, 0
+        バハムートスタッフ        60, 20, 0
+
+
+D
+    基本幅+10  上げ幅+2  期待値+5
+    3   7  11    アイアンナイフ
+    5   11  5    アイアンスタッフ
+    7   7   7    アイアンソード
+    9   5   5    アイアンメイス
+    11  3   3    アイアンアクス
+
+C
+    基本幅+10  上げ幅+3  期待値+20
+    13  19  24    スチールダガー
+    16  24  16    ライトスタッフ
+    19  19  19    スチールソード
+    21  16  16    スチールメイス
+    24  13  13    スチールアクス
+
+B
+    基本幅+20  上げ幅+4  期待値+35
+    33  45  51    ククリナイフ
+    37  51  37    スタッフオブペイン
+    41  41  41    ヘヴィソード
+    45  37  37    ヘヴィメイス
+    49  33  33    ヘヴィアクス
+    53  30  30    ヘヴィハンマー
+
+A
+    基本幅+30  上げ幅+5  期待値+50
+    64  74  84    デーモンダガー
+    69  84  69    エルブンスタッフ
+    74  74  74    エルブンソード
+    79  69  69    エルブンアクス
+    84  64  64    エルブンハンマー
+
+S
+    基本幅+40  上げ幅+6  期待値+75
+    103  127  145    ドラゴンナイフ
+    109  145  115    バハムートスタッフ
+    115  115  127    ルーンソード
+    121  121  121    フローズンナイト
+    127  127  115    ドラゴンブレード
+    133  115  115    ルーニックアクス
+    139  109  109    ミスティックハンマー
+    145  103  103    ソルハンマー
+
+
+
+Equip
+
+    EquipEntity : ItemEntity
+        (string id)
+        int atk
+        int def
+        int spd
+        int op_atk
+        int op_def
+        int op_spd
+        float view_scale
+
+    EquipFactory
+        create
+            return new EquipEntity
+
+    EquipCollection
+        Dictionary<string, EquipEntity> entities
+        this[string id]
+            return entities[id]
+
+    EquipController : equipEntity
+
+    EquipService
+        EquipCollection caches
+        Dictionary<srring, int> use_count
+
+        countUp(EquipEntity equip)
+            if(use_count[equip.id] < 1)
+                cashes.entities[equip.id] = EquipFactory.create(equip)
+            use_count[equip.id] += 1
+
+        countDown(EquipEntity equip)
+            use_count[equip.id] -= 1
+            if(use_count[equip.id] < 1)
+                cashes.entities[equip.id].destroy()
+                cashes.entities.Remove(equip.id)
+
+        this[string id]
+            return cashes.entities[id]
+
+Character
+
+    CharacterEntity
+        string id
+        int lv
+        int exp
+        int hp
+        int max_hp
+        int atk
+        int def
+        int spd
+        EquipEntity eqiup
+
+Character.Player
+
+    PlayerEntity : CharacterEntity
+        string id = player
+
+    PlayerFactory
+        create
+            return new PlayerEntity()
+
+    PleryService
+        PlayerEntity entity
+        bool move_enable = false
+        moveEnable() move_enable = true
+        moveDisable() move_enable = false
+        move(x, z) nav_mesh_agent.move(x, z)
+        changeEquip(equip)
+            手持ちのequipをdrop
+                equipをHuerarchyのルート直下に移動
+                ワールド座標でUnityちゃんの居る位置に移動
+            GameObjectをUnityちゃんの配下に移動
+            entity.equip = equip
+        addExp(exp)
+            newexp = entity.exp = exp
+
+    PlayerController
+        Start
+            イベント購読：動いていいよ
+                PlayerService.moveEnable
+            イベント購読：動いちゃダメだよ
+                PlayerService.moveDisable
+            イベント購読：ここ行って
+                PlayerService.move(x, z)
+            イベント購読：武器入れ替えて
+                PlayerService.changeEquip(EquipEntity equip)
+            イベント購読：経験値
+                PlayerService.addExp(int exp)
+        Update
+
+FieldObject
+
+    FieldObjectEntity
+        string id
+        int pos_x
+        int pos_z
+        int size
+        game_object
+        prefab_path
+
+    FieldObjectEntityFactory
+        create
+            EffectiveFloorEntity pos = EffectiveFloorService.rand()
+            FieldObjectEntity entity = new FieldObjectEntity {
+                id = t1
+                pos_x = pox.x
+                pos_z = pos.z
+            }
+            entity.game_object = Object.Instantiate(Resources.Load(entity.prefab_path, typeof(GameObject))) as GameObject;
+            entity.game_object.transform = new Vector3(entity.pos_x, 0.5f, entity.pos_x)
+            entity.game_object.transform.rotation += pos.rotation
+
+    FieldObjectCollection
+        List<FieldObjectEntity> entities
+
+    FieldObjectCollectionFactory
+        create
+            FieldObjectCollection collection = new FieldObjectCollection()
+            collection.entities = List<FieldObjectEntity>()
+            return collection
+
+    FieldObjectService
+        init
+            collection = FieldObjectCollectionFactory.create()
+
+        createEntity
+            FieldObjectEntity entity = FieldObjectEntityFactory.create()
+            collection.Add(entity);
+
+EffectiveFloor
+
+    EffectiveFloorEntity
+        float pos_x = 0
+        float pos_z = 0
+        bool enabled = true
+        int effective_size = 0
+        Vector3 rotation = new Vector3(0f, 0f, 0f)
+        FieldObjectEntity entity = null
+
+    EffectiveFloorEntityFactory
+        create
+            return new EffectiveFloorEntity
+
+    EffectiveFloorCollection
+        List<EffectiveFloorEntity> entities = new List<EffectiveFloorEntity>()
+
+    EffectiveFloorCollectionFactory
+        create
+            return new EffectiveFloorCollection
+
+    EffectiveFloorService
+        EffectiveFloorCollection collection = EffectiveFloorCollectionFactory.create
+
+        init
+            entities.Add(EffectiveFloorEntityFactory.create
+                pos_x = -1.5
+                pos_z = -4
+                effective_size = 4
+                rotation = new Vector3(0f, 0f, 0f)
+            )
+            entities.Add(EffectiveFloorEntityFactory.create
+                pos_x = -1.5
+                pos_z = -3
+                effective_size = 3
+                rotation = new Vector3(0f, 0f, 0f)
+            )
+            entities.Add(EffectiveFloorEntityFactory.create
+                pos_x = -1.5
+                pos_z = -2
+                effective_size = 2
+                rotation = new Vector3(0f, 0f, 0f)
+            )
+            entities.Add(EffectiveFloorEntityFactory.create
+                pos_x = -1.5
+                pos_z = -1
+                effective_size = 1
+                rotation = new Vector3(0f, 0f, 0f)
+            )
+            entities.Add(EffectiveFloorEntityFactory.create
+                pos_x = -1.5
+                pos_z = 1
+                effective_size = 4
+                rotation = new Vector3(0f, 0f, 0f)
+            )
+            entities.Add(EffectiveFloorEntityFactory.create
+                pos_x = -1.5
+                pos_z = 2
+                effective_size = 3
+                rotation = new Vector3(0f, 0f, 0f)
+            )
+            entities.Add(EffectiveFloorEntityFactory.create
+                pos_x = -1.5
+                pos_z = 3
+                effective_size = 2
+                rotation = new Vector3(0f, 90f, 0f)
+            )
+            entities.Add(EffectiveFloorEntityFactory.create
+                pos_x = -0.5
+                pos_z = 3
+                effective_size = 1
+                rotation = new Vector3(0f, 90f, 0f)
+            )
+            entities.Add(EffectiveFloorEntityFactory.create
+                pos_x = 1.5
+                pos_z = 3
+                effective_size = 2
+                rotation = new Vector3(0f, 90f, 0f)
+            )
+            entities.Add(EffectiveFloorEntityFactory.create
+                pos_x = 2.5
+                pos_z = 3
+                effective_size = 1
+                rotation = new Vector3(0f, 90f, 0f)
+            )
+
+        next
+            try {
+                int index = entities.FindIndex(x => x.enabled == true)
+            } catch(NotFoundException e) {
+                return null
+            }
+            if (entities[index].effective_size < size) {
+                return null
+            }
+            entities[index].enabled = false
+            return entities[index]
+
+        rand
+            if (false == entities.Exists(x => x.enabled == true)) {
+                return null
+            }
+            int index = Int.MinValue
+            do {
+                index = Random.Next(entities.Cout)
+            } while(entities[index].enabled == false)
+            entities[index].enabled = false
+            return entities[index]
+
+Item
+
+    enum ItemID
+        None
+        IWD1, IWD2, IWD3, IWD4
+        IWC1, IWC2, IWC3, IWC4
+        IWB1, IWB2, IWB3, IWB4
+        IWA1, IWA2, IWA3, IWA4
+        IWS1, IWS2, IWS3, IWS4
+
+    enum ItemType
+        None
+        Weapon
+        Shield
+        Helmet
+        BodyArmor
+        Globe
+        LegArmor
+        Boots
+        Item
+
+    enum ItemRank
+        None
+        D
+        C
+        B
+        A
+        S
+
+    ItemEntity
+        ItemType type = None
+        ItemRank rank = None
+        string id
+
+    ItemListFactory
+        Dictionary<ItemID, ItemEntity> create()
+            Dictionary<ItemID, ItemEntity> list = new Dictionary<ItemID, ItemEntity>()
+            {
+                {ItemID.IWD1, (ItemEntity)EquipFactory.create()}
+                {ItemID.IWD2, (ItemEntity)EquipFactory.create()}
+                {ItemID.IWD3, (ItemEntity)EquipFactory.create()}
+            }
+
+    ItemTableFactory
+        Dictionary<ItemType, Dictionary<ItemRank, string>> create(9)
+            Dictionary<ItemType, Dictionary<ItemRank, List<ItemID>>> table = new Dictionary<ItemType, Dictionary<ItemRank, string>> {
+                {
+                    ItemType.weapon, {
+                        ItemRank.D, {
+                            ItemID.IWD1,
+                            ItemID.IWD2,
+                            ItemID.IWD3
+                        }
+                    }
+                }
+            }
+
+    ItemService
+        Dictionary<string id, ItemEntity> list
+        Dictionary<ItemType, Dictionary<ItemRank, ItemID>> table
+
+        init
+            list = ItemListFactory.create()
+            table = ItemTableFactory.create()
+
+        T rand<T>(ItemType type, ItemRank rank)
+            return (T)list[table[type][rank]];
+
+        T get<T>(ItemID id)
+            return (T)list[id]
+
+        ItemRank rank(int game_stage)
+
+Item.Chest
+
+    ChestController
+        EquipEntity entity
+
+        Start
+            ItemType type = ItemType.Weapon;
+            itemRank rank = ItemService.rank(
+                Mathf.FloorToInt(GameStageService.roomClear() / 5)
+            );
+            entity = ItemService.rand<EquipEntity>(type, rank)
+        
+        OnTriggerEntryWithPlayer
+            ItemService.ItemEnable(entity, transform.position)
+
